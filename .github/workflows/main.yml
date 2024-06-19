@@ -8,14 +8,8 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - name: Exemplo
-        run: echo "Hello World !!!"
-
       - name: Checkout
         uses: actions/checkout@v4.1.7
-
-      - name: Listagem
-        run: ls
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -36,5 +30,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ci]
     steps:
-      - name: Exemplo
-        run: echo "Teste"
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - uses: azure/k8s-set-context@v4
+        with:
+           method: kubeconfig
+           kubeconfig: ${{ secrets.K8S_CONFIG }}
+
+      - uses: Azure/k8s-deploy@v5
+        with:
+          manifests: |
+              ./k8s/deployment.yaml
+          images: |
+              fabricioveronez/conversao-temperatura-fc:${{ github.run_number }}
